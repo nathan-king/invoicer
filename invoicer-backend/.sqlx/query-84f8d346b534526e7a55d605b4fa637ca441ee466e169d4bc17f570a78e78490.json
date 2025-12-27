@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO clients (name, email, created_at)\n        VALUES (?, ?, datetime('now'))\n        RETURNING id, name, email, created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "email",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "84f8d346b534526e7a55d605b4fa637ca441ee466e169d4bc17f570a78e78490"
+}

@@ -1,8 +1,12 @@
+use axum::routing::post;
 use axum::{Json, Router, routing::get};
 use serde::Serialize;
-use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
+use sqlx::sqlite::SqlitePoolOptions;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+
+mod handlers;
+mod models;
 
 #[tokio::main]
 async fn main() {
@@ -16,7 +20,10 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
-    let app = Router::new().route("/health", get(health)).with_state(pool);
+    let app = Router::new()
+        .route("/health", get(health))
+        .route("/clients", post(handlers::create_client))
+        .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = TcpListener::bind(addr).await.unwrap();
