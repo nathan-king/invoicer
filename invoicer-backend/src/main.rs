@@ -1,6 +1,6 @@
 use axum::{
     Json, Router,
-    routing::{get, post, put},
+    routing::{delete, get, post, put},
 };
 use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
@@ -28,6 +28,7 @@ async fn main() {
         .route("/clients", get(handlers::list_clients))
         .route("/clients/{id}", get(handlers::get_client))
         .route("/clients/{id}", put(handlers::update_client))
+        .route("/clients/{id}", delete(handlers::delete_client))
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

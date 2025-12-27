@@ -115,3 +115,25 @@ pub async fn update_client(
         None => Err(StatusCode::NOT_FOUND),
     }
 }
+
+pub async fn delete_client(
+    Path(id): Path<i64>,
+    State(pool): State<SqlitePool>,
+) -> Result<StatusCode, StatusCode> {
+    let result = sqlx::query(
+        r#"
+        DELETE FROM clients
+        WHERE id = ?
+        "#,
+    )
+    .bind(id)
+    .execute(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if result.rows_affected() == 0 {
+        Err(StatusCode::NOT_FOUND)
+    } else {
+        Ok(StatusCode::NO_CONTENT)
+    }
+}
