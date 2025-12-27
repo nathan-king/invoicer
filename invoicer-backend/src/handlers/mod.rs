@@ -1,4 +1,4 @@
-use crate::models::{Client, CreateClient};
+use crate::models::{Client, CreateClient, UpdateClient};
 use axum::{
     Json,
     extract::{Path, State},
@@ -69,6 +69,37 @@ pub async fn get_client(
         WHERE id = ?
         "#,
     )
+    .bind(id)
+    .fetch_optional(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    match row {
+        Some(row) => Ok(Json(Client {
+            id: row.get("id"),
+            name: row.get("name"),
+            email: row.get("email"),
+            created_at: row.get("created_at"),
+        })),
+        None => Err(StatusCode::NOT_FOUND),
+    }
+}
+
+pub async fn update_client(
+    Path(id): Path<i64>,
+    State(pool): State<SqlitePool>,
+    Json(payload): Json<UpdateClient>,
+) -> Result<Json<Client>, StatusCode> {
+    let row = sqlx::query(
+        r#"
+        UPDATE clients
+        SET name = ?, email = ?
+        WHERE id = ?
+        RETURNING id, name, email, created_at
+        "#,
+    )
+    .bind(payload.name)
+    .bind(payload.email)
     .bind(id)
     .fetch_optional(&pool)
     .await

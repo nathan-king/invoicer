@@ -13,3 +13,9 @@ pub struct CreateClient {
     pub name: String,
     pub email: Option<String>,
 }
+
+#[derive(Deserialize)]
+pub struct UpdateClient {
+    pub name: String,
+    pub email: Option<String>,
+}
