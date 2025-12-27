@@ -9,6 +9,7 @@ use tokio::net::TcpListener;
 
 mod handlers;
 mod models;
+mod routes;
 
 #[tokio::main]
 async fn main() {
@@ -24,11 +25,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", get(health))
-        .route("/clients", post(handlers::create_client))
-        .route("/clients", get(handlers::list_clients))
-        .route("/clients/{id}", get(handlers::get_client))
-        .route("/clients/{id}", put(handlers::update_client))
-        .route("/clients/{id}", delete(handlers::delete_client))
+        .merge(routes::clients::client_routes())
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
