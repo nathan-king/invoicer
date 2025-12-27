@@ -31,3 +31,32 @@ pub async fn create_invoice(
         due_at: row.get("due_at"),
     })
 }
+
+pub async fn list_invoices(State(pool): State<SqlitePool>) -> Json<Vec<Invoice>> {
+    let rows = sqlx::query(
+        r#"
+        SELECT id, client_id, status, issued_at, due_at
+        FROM invoices
+        ORDER BY issued_at DESC
+        "#,
+    )
+    .fetch_all(&pool)
+    .await
+    .expect("Failed to fetch invoices");
+
+    let invoices = rows
+        .into_iter()
+        .map(|row| {
+            let status_str: String = row.get("status");
+
+            Invoice {
+                id: row.get("id"),
+                client_id: row.get("client_id"),
+                status: InvoiceStatus::from_str(&status_str),
+                issued_at: row.get("issued_at"),
+                due_at: row.get("due_at"),
+            }
+        })
+        .collect();
+    Json(invoices)
+}

@@ -49,9 +49,9 @@ pub struct CreateInvoice {
     pub due_at: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct UpdateInvoice {
-    pub status: InvoiceStatus,
-    pub due_at: Option<String>,
-}
+// #[derive(Debug, Deserialize)]
+// #[serde(rename_all = "snake_case")]
+// pub struct UpdateInvoice {
+//     pub status: InvoiceStatus,
+//     pub due_at: Option<String>,
+// }
