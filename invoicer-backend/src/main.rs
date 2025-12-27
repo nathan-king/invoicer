@@ -1,5 +1,7 @@
-use axum::routing::post;
-use axum::{Json, Router, routing::get};
+use axum::{
+    Json, Router,
+    routing::{get, post},
+};
 use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::net::SocketAddr;
@@ -23,6 +25,7 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(health))
         .route("/clients", post(handlers::create_client))
+        .route("/clients", get(handlers::list_clients))
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
