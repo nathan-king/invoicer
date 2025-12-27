@@ -1,7 +1,4 @@
-use axum::{
-    Json, Router,
-    routing::{delete, get, post, put},
-};
+use axum::{Json, Router, routing::get};
 use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::net::SocketAddr;
