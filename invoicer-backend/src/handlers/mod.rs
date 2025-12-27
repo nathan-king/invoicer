@@ -1,5 +1,9 @@
 use crate::models::{Client, CreateClient};
-use axum::{Json, extract::State};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 use sqlx::{Row, SqlitePool};
 
 pub async fn create_client(
@@ -52,4 +56,31 @@ pub async fn list_clients(
         .collect();
 
     Json(clients)
+}
+
+pub async fn get_client(
+    Path(id): Path<i64>,
+    State(pool): State<SqlitePool>,
+) -> Result<Json<Client>, StatusCode> {
+    let row = sqlx::query(
+        r#"
+        SELECT id, name, email, created_at
+        FROM clients
+        WHERE id = ?
+        "#,
+    )
+    .bind(id)
+    .fetch_optional(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    match row {
+        Some(row) => Ok(Json(Client {
+            id: row.get("id"),
+            name: row.get("name"),
+            email: row.get("email"),
+            created_at: row.get("created_at"),
+        })),
+        None => Err(StatusCode::NOT_FOUND),
+    }
 }

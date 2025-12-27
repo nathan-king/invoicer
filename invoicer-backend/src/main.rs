@@ -26,6 +26,7 @@ async fn main() {
         .route("/health", get(health))
         .route("/clients", post(handlers::create_client))
         .route("/clients", get(handlers::list_clients))
+        .route("/clients/{id}", get(handlers::get_client))
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
