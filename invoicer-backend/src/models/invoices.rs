@@ -1,10 +1,35 @@
 use serde::{Deserialize, Serialize};
 
-enum InvoiceStatus {
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InvoiceStatus {
     Draft,
     Sent,
     Paid,
     Cancelled,
+}
+
+impl InvoiceStatus {
+    pub fn from_str(value: &str) -> Self {
+        match value {
+            "draft" => InvoiceStatus::Draft,
+            "sent" => InvoiceStatus::Sent,
+            "paid" => InvoiceStatus::Paid,
+            "cancelled" => InvoiceStatus::Cancelled,
+            _ => InvoiceStatus::Draft,
+        }
+    }
+}
+
+impl InvoiceStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            InvoiceStatus::Draft => "draft",
+            InvoiceStatus::Sent => "sent",
+            InvoiceStatus::Paid => "paid",
+            InvoiceStatus::Cancelled => "cancelled",
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]

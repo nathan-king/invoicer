@@ -23,6 +23,7 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(health))
         .merge(routes::clients::client_routes())
+        .merge(routes::invoices::invoice_routes())
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
