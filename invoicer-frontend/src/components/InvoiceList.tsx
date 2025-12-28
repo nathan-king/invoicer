@@ -19,7 +19,7 @@ export default function InvoiceList() {
       <ul>
         {invoices.map((invoice) => (
           <li key={invoice.id}>
-            Invoice #{invoice.id} -{invoice.status}
+            Invoice #{invoice.id} {invoice.client_name} - {invoice.status}
           </li>
         ))}
       </ul>
