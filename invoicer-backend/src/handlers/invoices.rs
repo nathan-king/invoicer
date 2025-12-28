@@ -1,7 +1,7 @@
-use crate::models::invoices::{CreateInvoice, Invoice, InvoiceStatus};
+use crate::models::invoices::{CreateInvoice, Invoice, InvoiceQuery, InvoiceStatus};
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
 };
 use sqlx::{Row, SqlitePool};
@@ -35,8 +35,23 @@ pub async fn create_invoice(
     })
 }
 
-pub async fn list_invoices_by_id(State(pool): State<SqlitePool>) -> Json<Vec<Invoice>> {
-    Json(list_invoices_ordered_by(&pool, "id DESC").await)
+fn order_by_from_query(sort: Option<&str>) -> &'static str {
+    match sort {
+        Some("issued_at") => "issued_at DESC",
+        Some("due_at") => "due_at DESC",
+        Some("status") => "status DESC",
+        Some("id") => "id DESC",
+        _ => "id DESC",
+    }
+}
+
+pub async fn list_invoices(
+    State(pool): State<SqlitePool>,
+    Query(query): Query<InvoiceQuery>,
+) -> Json<Vec<Invoice>> {
+    let order_by = order_by_from_query(query.sort.as_deref());
+
+    Json(list_invoices_ordered_by(&pool, order_by).await)
 }
 
 async fn list_invoices_ordered_by(pool: &SqlitePool, order_by: &str) -> Vec<Invoice> {

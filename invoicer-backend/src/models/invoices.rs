@@ -49,6 +49,11 @@ pub struct CreateInvoice {
     pub due_at: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct InvoiceQuery {
+    pub sort: Option<String>,
+}
+
 // #[derive(Debug, Deserialize)]
 // #[serde(rename_all = "snake_case")]
 // pub struct UpdateInvoice {
