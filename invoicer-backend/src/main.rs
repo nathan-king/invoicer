@@ -3,6 +3,7 @@ use serde::Serialize;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 
 mod handlers;
 mod models;
@@ -24,6 +25,7 @@ async fn main() {
         .route("/health", get(health))
         .merge(routes::clients::client_routes())
         .merge(routes::invoices::invoice_routes())
+        .layer(CorsLayer::permissive())
         .with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

@@ -42,6 +42,17 @@ pub struct Invoice {
     pub due_at: Option<String>,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub struct InvoiceWithClientName {
+    pub id: i64,
+    pub client_id: i64,
+    pub client_name: String,
+    pub status: InvoiceStatus,
+    pub issued_at: String,
+    pub due_at: Option<String>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CreateInvoice {
