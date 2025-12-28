@@ -1,7 +1,10 @@
-use axum::{Json, extract::State};
-use sqlx::{Row, SqlitePool};
-
 use crate::models::invoices::{CreateInvoice, Invoice, InvoiceStatus};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
+use sqlx::{Row, SqlitePool};
 
 pub async fn create_invoice(
     State(pool): State<SqlitePool>,
@@ -32,20 +35,26 @@ pub async fn create_invoice(
     })
 }
 
-pub async fn list_invoices(State(pool): State<SqlitePool>) -> Json<Vec<Invoice>> {
-    let rows = sqlx::query(
+pub async fn list_invoices_by_id(State(pool): State<SqlitePool>) -> Json<Vec<Invoice>> {
+    Json(list_invoices_ordered_by(&pool, "id DESC").await)
+}
+
+async fn list_invoices_ordered_by(pool: &SqlitePool, order_by: &str) -> Vec<Invoice> {
+    let query = format!(
         r#"
         SELECT id, client_id, status, issued_at, due_at
         FROM invoices
-        ORDER BY issued_at DESC
+        ORDER BY {}
         "#,
-    )
-    .fetch_all(&pool)
-    .await
-    .expect("Failed to fetch invoices");
+        order_by
+    );
 
-    let invoices = rows
-        .into_iter()
+    let rows = sqlx::query(&query)
+        .fetch_all(pool)
+        .await
+        .expect("Failed to fetch invoices");
+
+    rows.into_iter()
         .map(|row| {
             let status_str: String = row.get("status");
 
@@ -57,6 +66,37 @@ pub async fn list_invoices(State(pool): State<SqlitePool>) -> Json<Vec<Invoice>>
                 due_at: row.get("due_at"),
             }
         })
-        .collect();
-    Json(invoices)
+        .collect()
+}
+
+pub async fn get_invoice_by_id(
+    Path(id): Path<i64>,
+    State(pool): State<SqlitePool>,
+) -> Result<Json<Invoice>, StatusCode> {
+    let row = sqlx::query(
+        r#"
+        SELECT id, client_id, status, issued_at, due_at
+        FROM invoices
+        WHERE id = ?
+        "#,
+    )
+    .bind(id)
+    .fetch_optional(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    match row {
+        Some(row) => {
+            let status_str: String = row.get("status");
+
+            Ok(Json(Invoice {
+                id: row.get("id"),
+                client_id: row.get("client_id"),
+                status: InvoiceStatus::from_str(&status_str),
+                issued_at: row.get("issued_at"),
+                due_at: row.get("due_at"),
+            }))
+        }
+        None => Err(StatusCode::NOT_FOUND),
+    }
 }
